@@ -1,27 +1,30 @@
+-- Settings for ESP
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
     Box_Thickness = 1,
-    Tracer_Origin = "Bottom", -- Middle or Bottom if FollowMouse is on this won't matter...
+    Tracer_Origin = "Bottom", 
     Tracer_FollowMouse = false,
     Tracers = true,
-    Skeleton = true,
-    ViewAngle = true -- New setting to enable View Angle
+    Skeleton = true,  -- Add Skeleton option
+    View_Angle = true,  -- Add View Angle option
 }
 
 local Team_Check = {
-    TeamCheck = false, -- if TeamColor is on this won't matter...
+    TeamCheck = false,
     Green = Color3.fromRGB(0, 255, 0),
     Red = Color3.fromRGB(255, 0, 0)
 }
+
 local TeamColor = true
 
---// SEPARATION
+-- SEPARATION
 local player = game:GetService("Players").LocalPlayer
 local camera = game:GetService("Workspace").CurrentCamera
 local mouse = player:GetMouse()
 
+-- Function to create a Quad (Box)
 local function NewQuad(thickness, color)
     local quad = Drawing.new("Quad")
     quad.Visible = false
@@ -36,60 +39,121 @@ local function NewQuad(thickness, color)
     return quad
 end
 
+-- Function to create a Line (Tracer)
 local function NewLine(thickness, color)
     local line = Drawing.new("Line")
     line.Visible = false
     line.From = Vector2.new(0, 0)
     line.To = Vector2.new(0, 0)
-    line.Color = color
+    line.Color = color 
     line.Thickness = thickness
     line.Transparency = 1
     return line
 end
 
+-- Function to toggle visibility of library items
 local function Visibility(state, lib)
     for u, x in pairs(lib) do
         x.Visible = state
     end
 end
 
-local function ToColor3(col) --Function to convert, just cuz c;
-    local r = col.r --Red value
-    local g = col.g --Green value
-    local b = col.b --Blue value
-    return Color3.new(r,g,b); --Color3 datatype, made of the RGB inputs
+-- Function to convert color
+local function ToColor3(col)
+    local r = col.r
+    local g = col.g
+    local b = col.b
+    return Color3.new(r,g,b)
 end
 
-local black = Color3.fromRGB(0, 0 ,0)
+-- Function to create ESP for a player
 local function ESP(plr)
     local library = {
-        --//Tracer and Black Tracer(black border)
-        blacktracer = NewLine(Settings.Tracer_Thickness*2, black),
+        blacktracer = NewLine(Settings.Tracer_Thickness*2, Color3.fromRGB(0, 0 ,0)),
         tracer = NewLine(Settings.Tracer_Thickness, Settings.Tracer_Color),
-        --//Box and Black Box(black border)
-        black = NewQuad(Settings.Box_Thickness*2, black),
+        black = NewQuad(Settings.Box_Thickness*2, Color3.fromRGB(0, 0 ,0)),
         box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
-        --//Bar and Green Health Bar (part that moves up/down)
-        healthbar = NewLine(3, black),
-        greenhealth = NewLine(1.5, black),
-        --// View Angle
-        viewAngleLine = NewLine(1, Color3.fromRGB(255, 255, 0)) -- View Angle line
+        healthbar = NewLine(3, Color3.fromRGB(0, 0 ,0)),
+        greenhealth = NewLine(1.5, Color3.fromRGB(0, 0 ,0)),
+        -- Skeleton lines
+        skeleton = {
+            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Neck to torso
+            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Torso to legs
+            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Left arm
+            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Right arm
+        },
+        -- View Angle
+        viewAngleLine = NewLine(2, Color3.fromRGB(255, 255, 255))  -- Line to represent view angle
     }
-
-    library.viewAngleLine.Visible = false -- Set the view angle line initially hidden
 
     local function Colorize(color)
         for u, x in pairs(library) do
-            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and x ~= library.viewAngleLine then
+            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and x ~= library.skeleton then
                 x.Color = color
             end
+        end
+    end
+
+    local function UpdateSkeleton()
+        if Settings.Skeleton then
+            local humanoidRootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+            local head = plr.Character:FindFirstChild("Head")
+            local torso = plr.Character:FindFirstChild("UpperTorso") or plr.Character:FindFirstChild("LowerTorso")
+            local leftLeg = plr.Character:FindFirstChild("LeftLeg")
+            local rightLeg = plr.Character:FindFirstChild("RightLeg")
+            local leftArm = plr.Character:FindFirstChild("LeftUpperArm")
+            local rightArm = plr.Character:FindFirstChild("RightUpperArm")
+            
+            if humanoidRootPart and head and torso and leftLeg and rightLeg and leftArm and rightArm then
+                local headPos = camera:WorldToViewportPoint(head.Position)
+                local torsoPos = camera:WorldToViewportPoint(torso.Position)
+                local leftLegPos = camera:WorldToViewportPoint(leftLeg.Position)
+                local rightLegPos = camera:WorldToViewportPoint(rightLeg.Position)
+                local leftArmPos = camera:WorldToViewportPoint(leftArm.Position)
+                local rightArmPos = camera:WorldToViewportPoint(rightArm.Position)
+
+                -- Update skeleton lines (using lines to represent body parts)
+                library.skeleton[1].From = Vector2.new(headPos.X, headPos.Y)
+                library.skeleton[1].To = Vector2.new(torsoPos.X, torsoPos.Y)
+
+                library.skeleton[2].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                library.skeleton[2].To = Vector2.new(leftLegPos.X, leftLegPos.Y)
+
+                library.skeleton[3].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                library.skeleton[3].To = Vector2.new(leftArmPos.X, leftArmPos.Y)
+
+                library.skeleton[4].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                library.skeleton[4].To = Vector2.new(rightArmPos.X, rightArmPos.Y)
+
+                -- Make sure skeleton lines are visible
+                for _, line in pairs(library.skeleton) do
+                    line.Visible = true
+                end
+            end
+        end
+    end
+
+    -- View Angle Update
+    local function UpdateViewAngle()
+        if Settings.View_Angle then
+            local cameraDirection = camera.CFrame.LookVector  -- Get the camera's facing direction
+            local cameraPosition = camera.CFrame.Position
+            local targetPosition = cameraPosition + cameraDirection * 1000  -- Extend the direction to show a long line
+
+            -- Convert world position to screen position
+            local screenPos = camera:WorldToViewportPoint(targetPosition)
+            library.viewAngleLine.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+            library.viewAngleLine.To = Vector2.new(screenPos.X, screenPos.Y)
+
+            -- Make sure the view angle line is visible
+            library.viewAngleLine.Visible = true
         end
     end
 
     local function Updater()
         local connection
         connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if plr.Character ~= nil and plr.Character:FindFirstChild("Humanoid") ~= nil and plr.Character:FindFirstChild("HumanoidRootPart") ~= nil and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("Head") ~= nil then
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("Head") then
                 local HumPos, OnScreen = camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
                 if OnScreen then
                     local head = camera:WorldToViewportPoint(plr.Character.Head.Position)
@@ -104,7 +168,6 @@ local function ESP(plr)
                     Size(library.box)
                     Size(library.black)
 
-                    --//Tracer 
                     if Settings.Tracers then
                         if Settings.Tracer_Origin == "Middle" then
                             library.tracer.From = camera.ViewportSize*0.5
@@ -126,55 +189,19 @@ local function ESP(plr)
                         library.blacktracer.To = Vector2.new(0, 02)
                     end
 
-                    --// Health Bar
+                    -- Health Bar Update
                     local d = (Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2) - Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY*2)).magnitude 
                     local healthoffset = plr.Character.Humanoid.Health/plr.Character.Humanoid.MaxHealth * d
-
                     library.greenhealth.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
                     library.greenhealth.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2 - healthoffset)
-
-                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
+                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y)
                     library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY*2)
 
-                    local green = Color3.fromRGB(0, 255, 0)
-                    local red = Color3.fromRGB(255, 0, 0)
+                    -- Update Skeleton and View Angle
+                    UpdateSkeleton()
+                    UpdateViewAngle()
 
-                    library.greenhealth.Color = red:lerp(green, plr.Character.Humanoid.Health/plr.Character.Humanoid.MaxHealth);
-
-                    if Team_Check.TeamCheck then
-                        if plr.TeamColor == player.TeamColor then
-                            Colorize(Team_Check.Green)
-                        else 
-                            Colorize(Team_Check.Red)
-                        end
-                    else 
-                        library.tracer.Color = Settings.Tracer_Color
-                        library.box.Color = Settings.Box_Color
-                    end
-                    if TeamColor == true then
-                        Colorize(plr.TeamColor.Color)
-                    end
-
-                    --// View Angle Line (new code)
-                    if Settings.ViewAngle then
-                        local origin3D = plr.Character.Head.Position
-                        local direction = plr.Character.Head.CFrame.LookVector * 50 -- ปรับความยาวเส้น
-                        local destination3D = origin3D + direction
-
-                        local origin2D, onScreen1 = camera:WorldToViewportPoint(origin3D)
-                        local dest2D, onScreen2 = camera:WorldToViewportPoint(destination3D)
-
-                        if onScreen1 and onScreen2 then
-                            library.viewAngleLine.From = Vector2.new(origin2D.X, origin2D.Y)
-                            library.viewAngleLine.To = Vector2.new(dest2D.X, dest2D.Y)
-                            library.viewAngleLine.Visible = true
-                        else
-                            library.viewAngleLine.Visible = false
-                        end
-                    else
-                        library.viewAngleLine.Visible = false
-                    end
-
+                    -- Make sure the library is visible
                     Visibility(true, library)
                 else 
                     Visibility(false, library)
