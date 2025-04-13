@@ -7,8 +7,7 @@ local Settings = {
     Tracer_FollowMouse = false,
     Tracers = true,
     Skeleton = true,
-    ShowDistance = true, -- แสดงระยะห่าง
-    ViewAngle = true -- แสดงมุมมองของกล้อง
+    ShowDistance = true -- แสดงระยะห่าง
 }
 
 local Team_Check = {
@@ -184,18 +183,6 @@ local function ESP(plr)
                     if Settings.ShowDistance then
                         local distance = (char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
                         library.name.Text = plr.Name .. " | Dist: " .. math.floor(distance) .. " studs"
-                    end
-
-                    -- แสดงมุมมองกล้อง (View Angle)
-                    if Settings.ViewAngle then
-                        local angle = math.deg(camera.CFrame.Rotation:ToEulerAnglesYXZ())
-                        local viewAngleText = string.format("Angle: %.2f", angle)
-                        local viewAngleLabel = Drawing.new("Text")
-                        viewAngleLabel.Position = Vector2.new(20, 40)
-                        viewAngleLabel.Size = 14
-                        viewAngleLabel.Text = viewAngleText
-                        viewAngleLabel.Visible = true
-                        viewAngleLabel.Color = Color3.fromRGB(255, 255, 255)
                     end
 
                     Visibility(true, library)
