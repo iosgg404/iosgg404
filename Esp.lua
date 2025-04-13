@@ -65,21 +65,23 @@ end
 
 local function ESP(plr)
     local library = {
-        blacktracer = NewLine(Settings.Tracer_Thickness * 2, black),
-        tracer = NewLine(Settings.Tracer_Thickness, Settings.Tracer_Color),
-        black = NewQuad(Settings.Box_Thickness * 2, black),
-        box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
-        healthbar = NewLine(3, black),
-        greenhealth = NewLine(1.5, black),
-        name = Drawing.new("Text"),
-        skeleton = {
-            HeadToTorso = NewSkeletonLine(),
-            TorsoToLeftArm = NewSkeletonLine(),
-            TorsoToRightArm = NewSkeletonLine(),
-            TorsoToLeftLeg = NewSkeletonLine(),
-            TorsoToRightLeg = NewSkeletonLine()
-        }
+    local library = {
+    blacktracer = NewLine(Settings.Tracer_Thickness * 2, black),
+    tracer = NewLine(Settings.Tracer_Thickness, Settings.Tracer_Color),
+    black = NewQuad(Settings.Box_Thickness * 2, black),
+    box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
+    healthbar = NewLine(3, black),
+    greenhealth = NewLine(1.5, black),
+    name = Drawing.new("Text"),
+    viewline = NewLine(1, Color3.fromRGB(255, 255, 0)), -- <<== เพิ่มบรรทัดนี้ตรงนี้
+    skeleton = {
+        HeadToTorso = NewSkeletonLine(),
+        TorsoToLeftArm = NewSkeletonLine(),
+        TorsoToRightArm = NewSkeletonLine(),
+        TorsoToLeftLeg = NewSkeletonLine(),
+        TorsoToRightLeg = NewSkeletonLine()
     }
+        }
 
     library.name.Size = 13
     library.name.Center = true
@@ -172,6 +174,21 @@ local function ESP(plr)
                             end
                         end
                     end
+                                -- เส้นแสดงทิศทางที่ศัตรูมอง
+local lookVector = char.Head.CFrame.LookVector * 10 -- ปรับความยาวได้
+local startPos = char.Head.Position
+local endPos = startPos + lookVector
+
+local startScreenPos, startOnScreen = camera:WorldToViewportPoint(startPos)
+local endScreenPos, endOnScreen = camera:WorldToViewportPoint(endPos)
+
+if startOnScreen and endOnScreen then
+    library.viewline.From = Vector2.new(startScreenPos.X, startScreenPos.Y)
+    library.viewline.To = Vector2.new(endScreenPos.X, endScreenPos.Y)
+    library.viewline.Visible = true
+else
+    library.viewline.Visible = false
+                                end
 
                     -- สีทีม
                     if Team_Check.TeamCheck then
