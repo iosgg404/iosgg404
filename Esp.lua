@@ -1,17 +1,14 @@
--- FULL ESP with View Angle, Skeleton, Distance, Tracer, Box
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
     Box_Thickness = 1,
-    Tracer_Origin = "Bottom", -- "Middle" หรือ "Bottom"
+    Tracer_Origin = "Bottom", -- Middle หรือ Bottom (หาก FollowMouse เปิด อันนี้จะไม่สำคัญ)
     Tracer_FollowMouse = false,
     Tracers = true,
     Skeleton = true,
-    ViewAngle = true,
-    ViewAngle_Color = Color3.fromRGB(0, 255, 255),
-    ViewAngle_Thickness = 2,
-    MaxDistance = 1000
+    ShowDistance = true, -- แสดงระยะห่าง
+    ViewAngle = true -- แสดงมุมมองของกล้อง
 }
 
 local Team_Check = {
@@ -76,7 +73,6 @@ local function ESP(plr)
         healthbar = NewLine(3, black),
         greenhealth = NewLine(1.5, black),
         name = Drawing.new("Text"),
-        distance = Drawing.new("Text"),
         skeleton = {
             HeadToTorso = NewSkeletonLine(),
             TorsoToLeftArm = NewSkeletonLine(),
@@ -86,19 +82,17 @@ local function ESP(plr)
         }
     }
 
-    -- ตั้งค่าชื่อและระยะทาง
-    for _, txt in pairs({library.name, library.distance}) do
-        txt.Size = 13
-        txt.Center = true
-        txt.Outline = true
-        txt.Font = 2
-        txt.Visible = false
-        txt.Color = Color3.new(1, 1, 1)
-    end
+    library.name.Size = 13
+    library.name.Center = true
+    library.name.Outline = true
+    library.name.Font = 2
+    library.name.Visible = false
+    library.name.Text = plr.Name
+    library.name.Color = Color3.new(1, 1, 1)
 
     local function Colorize(color)
         for k, x in pairs(library) do
-            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and k ~= "name" and k ~= "distance" and k ~= "skeleton" then
+            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and k ~= "name" and k ~= "skeleton" then
                 x.Color = color
             end
         end
@@ -111,9 +105,8 @@ local function ESP(plr)
             if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") and char.Humanoid.Health > 0 then
                 local HumPos, OnScreen = camera:WorldToViewportPoint(char.HumanoidRootPart.Position)
                 local head = camera:WorldToViewportPoint(char.Head.Position)
-                local dist = (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and (player.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).magnitude) or 0
-                if OnScreen and dist <= Settings.MaxDistance then
-                            local DistanceY = math.clamp((Vector2.new(head.X, head.Y) - Vector2.new(HumPos.X, HumPos.Y)).magnitude, 2, math.huge)
+                if OnScreen then
+                    local DistanceY = math.clamp((Vector2.new(head.X, head.Y) - Vector2.new(HumPos.X, HumPos.Y)).magnitude, 2, math.huge)
 
                     local function Size(item)
                         item.PointA = Vector2.new(HumPos.X + DistanceY, HumPos.Y - DistanceY*2)
@@ -148,11 +141,6 @@ local function ESP(plr)
                     library.name.Position = Vector2.new(head.X, head.Y - 20)
                     library.name.Visible = true
 
-                    -- Distance
-                    library.distance.Position = Vector2.new(head.X, head.Y + 15)
-                    library.distance.Text = "Dist: " .. math.floor(dist) .. " Studs"
-                    library.distance.Visible = true
-
                     -- Skeleton
                     if Settings.Skeleton then
                         local function getVec(part)
@@ -178,7 +166,7 @@ local function ESP(plr)
                         end
                     end
 
-                    -- ทีมสี
+                    -- สีทีม
                     if Team_Check.TeamCheck then
                         if plr.TeamColor == player.TeamColor then
                             Colorize(Team_Check.Green)
@@ -189,6 +177,24 @@ local function ESP(plr)
                         Colorize(plr.TeamColor.Color)
                     else
                         Colorize(Settings.Box_Color)
+                    end
+
+                    -- แสดงระยะห่าง
+                    if Settings.ShowDistance then
+                        local distance = (char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                        library.name.Text = plr.Name .. " | Dist: " .. math.floor(distance) .. " studs"
+                    end
+
+                    -- แสดงมุมมองกล้อง (View Angle)
+                    if Settings.ViewAngle then
+                        local angle = math.deg(camera.CFrame.Rotation:ToEulerAnglesYXZ())
+                        local viewAngleText = string.format("Angle: %.2f", angle)
+                        local viewAngleLabel = Drawing.new("Text")
+                        viewAngleLabel.Position = Vector2.new(20, 20)
+                        viewAngleLabel.Size = 14
+                        viewAngleLabel.Text = viewAngleText
+                        viewAngleLabel.Visible = true
+                        viewAngleLabel.Color = Color3.fromRGB(255, 255, 255)
                     end
 
                     Visibility(true, library)
@@ -204,3 +210,15 @@ local function ESP(plr)
         end)
     end)()
 end
+
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= player then
+        ESP(v)
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(plr)
+    if plr ~= player then
+        ESP(plr)
+    end
+end)
