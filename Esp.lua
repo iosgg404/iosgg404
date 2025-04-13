@@ -7,7 +7,7 @@ local Settings = {
     Tracer_FollowMouse = false,
     Tracers = true,
     Skeleton = true,
-    ShowDistance = true -- แสดงระยะห่าง
+    ShowDistance = true -- เพิ่มตัวเลือกเพื่อแสดงระยะห่าง
 }
 
 local Team_Check = {
@@ -23,7 +23,6 @@ local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
 local black = Color3.fromRGB(0, 0, 0)
 
--- สร้างฟังก์ชันสำหรับการวาดเส้น (Line) และกล่อง (Quad)
 local function NewLine(thickness, color)
     local line = Drawing.new("Line")
     line.Visible = false
@@ -137,6 +136,14 @@ local function ESP(plr)
                     library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY*2)
                     library.greenhealth.Color = Color3.fromRGB(255,0,0):lerp(Color3.fromRGB(0,255,0), char.Humanoid.Health / char.Humanoid.MaxHealth)
 
+                    -- คำนวณระยะห่าง
+                    local distance = (char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+
+                    -- แสดงชื่อพร้อมระยะห่าง
+                    if Settings.ShowDistance then
+                        library.name.Text = plr.Name .. " | Stud: " .. math.floor(distance)
+                    end
+
                     -- Name
                     library.name.Position = Vector2.new(head.X, head.Y - 20)
                     library.name.Visible = true
@@ -177,12 +184,6 @@ local function ESP(plr)
                         Colorize(plr.TeamColor.Color)
                     else
                         Colorize(Settings.Box_Color)
-                    end
-
-                    -- แสดงระยะห่าง
-                    if Settings.ShowDistance then
-                        local distance = (char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                        library.name.Text = plr.Name .. " | Dist: " .. math.floor(distance) .. " studs"
                     end
 
                     Visibility(true, library)
