@@ -1,10 +1,9 @@
-
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
     Box_Thickness = 1,
-    Tracer_Origin = "Bottom",
+    Tracer_Origin = "Bottom", -- "Middle" หรือ "Bottom"
     Tracer_FollowMouse = false,
     Tracers = true,
     Skeleton = true,
@@ -73,7 +72,6 @@ local function ESP(plr)
         healthbar = NewLine(3, black),
         greenhealth = NewLine(1.5, black),
         name = Drawing.new("Text"),
-        viewline = NewLine(1, Color3.fromRGB(255, 255, 0)),
         skeleton = {
             HeadToTorso = NewSkeletonLine(),
             TorsoToLeftArm = NewSkeletonLine(),
@@ -93,7 +91,7 @@ local function ESP(plr)
 
     local function Colorize(color)
         for k, x in pairs(library) do
-            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and k ~= "name" and k ~= "skeleton" and k ~= "viewline" then
+            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and k ~= "name" and k ~= "skeleton" then
                 x.Color = color
             end
         end
@@ -106,18 +104,21 @@ local function ESP(plr)
             if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") and char.Humanoid.Health > 0 then
                 local HumPos, OnScreen = camera:WorldToViewportPoint(char.HumanoidRootPart.Position)
                 local head = camera:WorldToViewportPoint(char.Head.Position)
+
                 if OnScreen then
                     local DistanceY = math.clamp((Vector2.new(head.X, head.Y) - Vector2.new(HumPos.X, HumPos.Y)).magnitude, 2, math.huge)
 
                     local function Size(item)
-                        item.PointA = Vector2.new(HumPos.X + DistanceY, HumPos.Y - DistanceY*2)
-                        item.PointB = Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2)
-                        item.PointC = Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY*2)
-                        item.PointD = Vector2.new(HumPos.X + DistanceY, HumPos.Y + DistanceY*2)
+                        item.PointA = Vector2.new(HumPos.X + DistanceY, HumPos.Y - DistanceY * 2)
+                        item.PointB = Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY * 2)
+                        item.PointC = Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY * 2)
+                        item.PointD = Vector2.new(HumPos.X + DistanceY, HumPos.Y + DistanceY * 2)
                     end
+
                     Size(library.box)
                     Size(library.black)
 
+                    -- Tracers
                     if Settings.Tracers then
                         local origin = Settings.Tracer_FollowMouse and Vector2.new(mouse.X, mouse.Y + 36) or (Settings.Tracer_Origin == "Middle" and camera.ViewportSize * 0.5 or Vector2.new(camera.ViewportSize.X * 0.5, camera.ViewportSize.Y))
                         library.tracer.From = origin
@@ -129,14 +130,16 @@ local function ESP(plr)
                         library.blacktracer.Visible = false
                     end
 
-                    local d = (Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2) - Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY*2)).magnitude
+                    -- Health bar
+                    local d = (Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY * 2) - Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY * 2)).magnitude
                     local healthoffset = char.Humanoid.Health / char.Humanoid.MaxHealth * d
-                    library.greenhealth.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
-                    library.greenhealth.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2 - healthoffset)
-                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
-                    library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY*2)
-                    library.greenhealth.Color = Color3.fromRGB(255,0,0):lerp(Color3.fromRGB(0,255,0), char.Humanoid.Health / char.Humanoid.MaxHealth)
+                    library.greenhealth.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY * 2)
+                    library.greenhealth.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY * 2 - healthoffset)
+                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY * 2)
+                    library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY * 2)
+                    library.greenhealth.Color = Color3.fromRGB(255, 0, 0):lerp(Color3.fromRGB(0, 255, 0), char.Humanoid.Health / char.Humanoid.MaxHealth)
 
+                    -- Distance and name
                     local distance = (char.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
                     if Settings.ShowDistance then
                         library.name.Text = plr.Name .. " | Stud: " .. math.floor(distance)
@@ -144,11 +147,13 @@ local function ESP(plr)
                     library.name.Position = Vector2.new(head.X, head.Y - 20)
                     library.name.Visible = true
 
+                    -- Skeleton
                     if Settings.Skeleton then
                         local function getVec(part)
                             local pos, visible = camera:WorldToViewportPoint(part.Position)
                             return Vector2.new(pos.X, pos.Y), visible
                         end
+
                         local joints = {
                             HeadToTorso = {char.Head, char.HumanoidRootPart},
                             TorsoToLeftArm = {char:FindFirstChild("LeftUpperArm") or char:FindFirstChild("Left Arm"), char.HumanoidRootPart},
@@ -156,6 +161,7 @@ local function ESP(plr)
                             TorsoToLeftLeg = {char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg"), char.HumanoidRootPart},
                             TorsoToRightLeg = {char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"), char.HumanoidRootPart}
                         }
+
                         for name, parts in pairs(joints) do
                             local a, b = parts[1], parts[2]
                             if a and b then
@@ -168,22 +174,7 @@ local function ESP(plr)
                         end
                     end
 
-                    -- Viewline: direction the enemy is looking
-                    local lookVector = char.Head.CFrame.LookVector * 10
-                    local startPos = char.Head.Position
-                    local endPos = startPos + lookVector
-
-                    local startScreenPos, startOnScreen = camera:WorldToViewportPoint(startPos)
-                    local endScreenPos, endOnScreen = camera:WorldToViewportPoint(endPos)
-
-                    if startOnScreen and endOnScreen then
-                        library.viewline.From = Vector2.new(startScreenPos.X, startScreenPos.Y)
-                        library.viewline.To = Vector2.new(endScreenPos.X, endScreenPos.Y)
-                        library.viewline.Visible = true
-                    else
-                        library.viewline.Visible = false
-                    end
-
+                    -- Team color
                     if Team_Check.TeamCheck then
                         if plr.TeamColor == player.TeamColor then
                             Colorize(Team_Check.Green)
@@ -210,12 +201,14 @@ local function ESP(plr)
     end)()
 end
 
+-- เรียกใช้ ESP กับผู้เล่นที่มีอยู่แล้ว
 for _, v in pairs(game.Players:GetPlayers()) do
     if v ~= player then
         ESP(v)
     end
 end
 
+-- เรียกใช้ ESP เมื่อมีผู้เล่นใหม่เข้ามา
 game.Players.PlayerAdded:Connect(function(plr)
     if plr ~= player then
         ESP(plr)
