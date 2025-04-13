@@ -1,64 +1,71 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local Settings = {
+    ViewAngle = true,
+    ViewAngle_Thickness = 2,
+    MaxDistance = 1000
+}
 
-local TeamCheck = true -- true = แสดงเฉพาะศัตรู
+local player = game:GetService("Players").LocalPlayer
+local camera = workspace.CurrentCamera
 
-local function NewViewLine()
+local function NewLine(thickness)
     local line = Drawing.new("Line")
-    line.Thickness = 2
-    line.Color = Color3.fromRGB(0, 255, 255)
-    line.Transparency = 1
     line.Visible = false
+    line.Thickness = thickness
+    line.Transparency = 1
     return line
 end
 
-local ViewLines = {}
+local function CreateViewAngle(plr)
+    local line = NewLine(Settings.ViewAngle_Thickness)
 
-local function AddPlayer(player)
-    if player == LocalPlayer then return end
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if not plr.Character or not plr.Character:FindFirstChild("Head") or plr == player then
+            line.Visible = false
+            return
+        end
 
-    local line = NewViewLine()
-    ViewLines[player] = line
+        local head = plr.Character.Head
+        local headPos = head.Position
+        local lookVec = head.CFrame.LookVector
+        local endPos = headPos + (lookVec * 5)
 
-    RunService.RenderStepped:Connect(function()
-        local char = player.Character
-        local head = char and char:FindFirstChild("Head")
-        if head and head:IsA("BasePart") then
-            if TeamCheck and player.Team == LocalPlayer.Team then
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (player.Character.HumanoidRootPart.Position - headPos).Magnitude
+            if dist > Settings.MaxDistance then
                 line.Visible = false
                 return
             end
 
-            local origin = head.Position
-            local look = head.CFrame.LookVector * 10
-            local destination = origin + look
-
-            local origin2D, onScreen1 = Camera:WorldToViewportPoint(origin)
-            local dest2D, onScreen2 = Camera:WorldToViewportPoint(destination)
-
-            if onScreen1 and onScreen2 then
-                line.From = Vector2.new(origin2D.X, origin2D.Y)
-                line.To = Vector2.new(dest2D.X, dest2D.Y)
-                line.Visible = true
+            if dist <= 100 then
+                line.Color = Color3.fromRGB(0, 255, 0) -- เขียว
+            elseif dist <= 300 then
+                line.Color = Color3.fromRGB(255, 255, 0) -- เหลือง
             else
-                line.Visible = false
+                line.Color = Color3.fromRGB(255, 0, 0) -- แดง
             end
+        end
+
+        local screenStart, onScreen1 = camera:WorldToViewportPoint(headPos)
+        local screenEnd, onScreen2 = camera:WorldToViewportPoint(endPos)
+
+        if onScreen1 and onScreen2 then
+            line.From = Vector2.new(screenStart.X, screenStart.Y)
+            line.To = Vector2.new(screenEnd.X, screenEnd.Y)
+            line.Visible = true
         else
             line.Visible = false
         end
     end)
 end
 
-for _, plr in ipairs(Players:GetPlayers()) do
-    AddPlayer(plr)
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= player then
+        CreateViewAngle(v)
+    end
 end
 
-Players.PlayerAdded:Connect(AddPlayer)
-Players.PlayerRemoving:Connect(function(plr)
-    if ViewLines[plr] then
-        ViewLines[plr]:Remove()
-        ViewLines[plr] = nil
+game.Players.PlayerAdded:Connect(function(plr)
+    if plr ~= player then
+        CreateViewAngle(plr)
     end
 end)
