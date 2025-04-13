@@ -1,13 +1,16 @@
--- Full ESP Script with Name, Distance, Skeleton, Box, Tracers
+-- FULL ESP with View Angle, Skeleton, Distance, Tracer, Box
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
     Box_Thickness = 1,
-    Tracer_Origin = "Bottom", -- Middle หรือ Bottom
+    Tracer_Origin = "Bottom", -- "Middle" หรือ "Bottom"
     Tracer_FollowMouse = false,
     Tracers = true,
     Skeleton = true,
+    ViewAngle = true,
+    ViewAngle_Color = Color3.fromRGB(0, 255, 255),
+    ViewAngle_Thickness = 2,
     MaxDistance = 1000
 }
 
@@ -83,19 +86,15 @@ local function ESP(plr)
         }
     }
 
-    library.name.Size = 13
-    library.name.Center = true
-    library.name.Outline = true
-    library.name.Font = 2
-    library.name.Visible = false
-    library.name.Color = Color3.new(1, 1, 1)
-
-    library.distance.Size = 13
-    library.distance.Center = true
-    library.distance.Outline = true
-    library.distance.Font = 2
-    library.distance.Visible = false
-    library.distance.Color = Color3.new(1, 1, 1)
+    -- ตั้งค่าชื่อและระยะทาง
+    for _, txt in pairs({library.name, library.distance}) do
+        txt.Size = 13
+        txt.Center = true
+        txt.Outline = true
+        txt.Font = 2
+        txt.Visible = false
+        txt.Color = Color3.new(1, 1, 1)
+    end
 
     local function Colorize(color)
         for k, x in pairs(library) do
@@ -125,13 +124,15 @@ local function ESP(plr)
                     Size(library.box)
                     Size(library.black)
 
-                    -- Tracer
                     if Settings.Tracers then
                         local origin = Settings.Tracer_FollowMouse and Vector2.new(mouse.X, mouse.Y + 36) or (Settings.Tracer_Origin == "Middle" and camera.ViewportSize * 0.5 or Vector2.new(camera.ViewportSize.X * 0.5, camera.ViewportSize.Y))
                         library.tracer.From = origin
                         library.blacktracer.From = origin
                         library.tracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY * 2)
                         library.blacktracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY * 2)
+                    else
+                        library.tracer.Visible = false
+                        library.blacktracer.Visible = false
                     end
 
                     -- Health bar
@@ -143,20 +144,20 @@ local function ESP(plr)
                     library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY*2)
                     library.greenhealth.Color = Color3.fromRGB(255,0,0):lerp(Color3.fromRGB(0,255,0), char.Humanoid.Health / char.Humanoid.MaxHealth)
 
-                    -- Name + Distance
-                    library.name.Position = Vector2.new(head.X, head.Y - 25)
-                    library.name.Text = plr.Name
+                    -- Name
+                    library.name.Position = Vector2.new(head.X, head.Y - 20)
                     library.name.Visible = true
 
-                    library.distance.Position = Vector2.new(head.X, head.Y - 10)
-                    library.distance.Text = "Stud: " .. tostring(math.floor(dist))
+                    -- Distance
+                    library.distance.Position = Vector2.new(head.X, head.Y + 15)
+                    library.distance.Text = "Dist: " .. math.floor(dist) .. " Studs"
                     library.distance.Visible = true
 
                     -- Skeleton
                     if Settings.Skeleton then
                         local function getVec(part)
-                            local pos, _ = camera:WorldToViewportPoint(part.Position)
-                            return Vector2.new(pos.X, pos.Y)
+                            local pos, visible = camera:WorldToViewportPoint(part.Position)
+                            return Vector2.new(pos.X, pos.Y), visible
                         end
                         local joints = {
                             HeadToTorso = {char.Head, char.HumanoidRootPart},
@@ -166,16 +167,24 @@ local function ESP(plr)
                             TorsoToRightLeg = {char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"), char.HumanoidRootPart}
                         }
                         for name, parts in pairs(joints) do
-                            if parts[1] and parts[2] then
-                                library.skeleton[name].From = getVec(parts[1])
-                                library.skeleton[name].To = getVec(parts[2])
+                            local a, b = parts[1], parts[2]
+                            if a and b then
+                                local aVec, _ = getVec(a)
+                                local bVec, _ = getVec(b)
+                                library.skeleton[name].From = aVec
+                                library.skeleton[name].To = bVec
                                 library.skeleton[name].Visible = true
                             end
                         end
                     end
 
+                    -- ทีมสี
                     if Team_Check.TeamCheck then
-                        Colorize(plr.TeamColor == player.TeamColor and Team_Check.Green or Team_Check.Red)
+                        if plr.TeamColor == player.TeamColor then
+                            Colorize(Team_Check.Green)
+                        else
+                            Colorize(Team_Check.Red)
+                        end
                     elseif TeamColor then
                         Colorize(plr.TeamColor.Color)
                     else
@@ -195,15 +204,3 @@ local function ESP(plr)
         end)
     end)()
 end
-
-for _, v in pairs(game.Players:GetPlayers()) do
-    if v ~= player then
-        ESP(v)
-    end
-end
-
-game.Players.PlayerAdded:Connect(function(plr)
-    if plr ~= player then
-        ESP(plr)
-    end
-end)
