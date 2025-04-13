@@ -1,14 +1,14 @@
--- Settings for ESP
+-- Full ESP Script with Name, Distance, Skeleton, Box, Tracers
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
     Box_Thickness = 1,
-    Tracer_Origin = "Bottom", 
+    Tracer_Origin = "Bottom", -- Middle หรือ Bottom
     Tracer_FollowMouse = false,
     Tracers = true,
-    Skeleton = true,  -- Add Skeleton option
-    View_Angle = true,  -- Add View Angle option
+    Skeleton = true,
+    MaxDistance = 1000
 }
 
 local Team_Check = {
@@ -19,146 +19,103 @@ local Team_Check = {
 
 local TeamColor = true
 
--- SEPARATION
 local player = game:GetService("Players").LocalPlayer
-local camera = game:GetService("Workspace").CurrentCamera
+local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
+local black = Color3.fromRGB(0, 0, 0)
 
--- Function to create a Quad (Box)
-local function NewQuad(thickness, color)
-    local quad = Drawing.new("Quad")
-    quad.Visible = false
-    quad.PointA = Vector2.new(0,0)
-    quad.PointB = Vector2.new(0,0)
-    quad.PointC = Vector2.new(0,0)
-    quad.PointD = Vector2.new(0,0)
-    quad.Color = color
-    quad.Filled = false
-    quad.Thickness = thickness
-    quad.Transparency = 1
-    return quad
-end
-
--- Function to create a Line (Tracer)
 local function NewLine(thickness, color)
     local line = Drawing.new("Line")
     line.Visible = false
-    line.From = Vector2.new(0, 0)
-    line.To = Vector2.new(0, 0)
-    line.Color = color 
     line.Thickness = thickness
+    line.Color = color
     line.Transparency = 1
     return line
 end
 
--- Function to toggle visibility of library items
+local function NewQuad(thickness, color)
+    local quad = Drawing.new("Quad")
+    quad.Visible = false
+    quad.Thickness = thickness
+    quad.Filled = false
+    quad.Color = color
+    quad.Transparency = 1
+    return quad
+end
+
+local function NewSkeletonLine()
+    local line = Drawing.new("Line")
+    line.Visible = false
+    line.Thickness = 1
+    line.Color = Color3.fromRGB(255, 255, 255)
+    line.Transparency = 1
+    return line
+end
+
 local function Visibility(state, lib)
-    for u, x in pairs(lib) do
-        x.Visible = state
+    for _, v in pairs(lib) do
+        if typeof(v) == "table" then
+            for _, x in pairs(v) do
+                x.Visible = state
+            end
+        else
+            v.Visible = state
+        end
     end
 end
 
--- Function to convert color
-local function ToColor3(col)
-    local r = col.r
-    local g = col.g
-    local b = col.b
-    return Color3.new(r,g,b)
-end
-
--- Function to create ESP for a player
 local function ESP(plr)
     local library = {
-        blacktracer = NewLine(Settings.Tracer_Thickness*2, Color3.fromRGB(0, 0 ,0)),
+        blacktracer = NewLine(Settings.Tracer_Thickness * 2, black),
         tracer = NewLine(Settings.Tracer_Thickness, Settings.Tracer_Color),
-        black = NewQuad(Settings.Box_Thickness*2, Color3.fromRGB(0, 0 ,0)),
+        black = NewQuad(Settings.Box_Thickness * 2, black),
         box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
-        healthbar = NewLine(3, Color3.fromRGB(0, 0 ,0)),
-        greenhealth = NewLine(1.5, Color3.fromRGB(0, 0 ,0)),
-        -- Skeleton lines
+        healthbar = NewLine(3, black),
+        greenhealth = NewLine(1.5, black),
+        name = Drawing.new("Text"),
+        distance = Drawing.new("Text"),
         skeleton = {
-            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Neck to torso
-            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Torso to legs
-            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Left arm
-            NewLine(1, Color3.fromRGB(255, 255, 0)), -- Right arm
-        },
-        -- View Angle
-        viewAngleLine = NewLine(2, Color3.fromRGB(255, 255, 255))  -- Line to represent view angle
+            HeadToTorso = NewSkeletonLine(),
+            TorsoToLeftArm = NewSkeletonLine(),
+            TorsoToRightArm = NewSkeletonLine(),
+            TorsoToLeftLeg = NewSkeletonLine(),
+            TorsoToRightLeg = NewSkeletonLine()
+        }
     }
 
+    library.name.Size = 13
+    library.name.Center = true
+    library.name.Outline = true
+    library.name.Font = 2
+    library.name.Visible = false
+    library.name.Color = Color3.new(1, 1, 1)
+
+    library.distance.Size = 13
+    library.distance.Center = true
+    library.distance.Outline = true
+    library.distance.Font = 2
+    library.distance.Visible = false
+    library.distance.Color = Color3.new(1, 1, 1)
+
     local function Colorize(color)
-        for u, x in pairs(library) do
-            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and x ~= library.skeleton then
+        for k, x in pairs(library) do
+            if x ~= library.healthbar and x ~= library.greenhealth and x ~= library.blacktracer and x ~= library.black and k ~= "name" and k ~= "distance" and k ~= "skeleton" then
                 x.Color = color
             end
         end
     end
 
-    local function UpdateSkeleton()
-        if Settings.Skeleton then
-            local humanoidRootPart = plr.Character:FindFirstChild("HumanoidRootPart")
-            local head = plr.Character:FindFirstChild("Head")
-            local torso = plr.Character:FindFirstChild("UpperTorso") or plr.Character:FindFirstChild("LowerTorso")
-            local leftLeg = plr.Character:FindFirstChild("LeftLeg")
-            local rightLeg = plr.Character:FindFirstChild("RightLeg")
-            local leftArm = plr.Character:FindFirstChild("LeftUpperArm")
-            local rightArm = plr.Character:FindFirstChild("RightUpperArm")
-            
-            if humanoidRootPart and head and torso and leftLeg and rightLeg and leftArm and rightArm then
-                local headPos = camera:WorldToViewportPoint(head.Position)
-                local torsoPos = camera:WorldToViewportPoint(torso.Position)
-                local leftLegPos = camera:WorldToViewportPoint(leftLeg.Position)
-                local rightLegPos = camera:WorldToViewportPoint(rightLeg.Position)
-                local leftArmPos = camera:WorldToViewportPoint(leftArm.Position)
-                local rightArmPos = camera:WorldToViewportPoint(rightArm.Position)
-
-                -- Update skeleton lines (using lines to represent body parts)
-                library.skeleton[1].From = Vector2.new(headPos.X, headPos.Y)
-                library.skeleton[1].To = Vector2.new(torsoPos.X, torsoPos.Y)
-
-                library.skeleton[2].From = Vector2.new(torsoPos.X, torsoPos.Y)
-                library.skeleton[2].To = Vector2.new(leftLegPos.X, leftLegPos.Y)
-
-                library.skeleton[3].From = Vector2.new(torsoPos.X, torsoPos.Y)
-                library.skeleton[3].To = Vector2.new(leftArmPos.X, leftArmPos.Y)
-
-                library.skeleton[4].From = Vector2.new(torsoPos.X, torsoPos.Y)
-                library.skeleton[4].To = Vector2.new(rightArmPos.X, rightArmPos.Y)
-
-                -- Make sure skeleton lines are visible
-                for _, line in pairs(library.skeleton) do
-                    line.Visible = true
-                end
-            end
-        end
-    end
-
-    -- View Angle Update
-    local function UpdateViewAngle()
-        if Settings.View_Angle then
-            local cameraDirection = camera.CFrame.LookVector  -- Get the camera's facing direction
-            local cameraPosition = camera.CFrame.Position
-            local targetPosition = cameraPosition + cameraDirection * 1000  -- Extend the direction to show a long line
-
-            -- Convert world position to screen position
-            local screenPos = camera:WorldToViewportPoint(targetPosition)
-            library.viewAngleLine.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
-            library.viewAngleLine.To = Vector2.new(screenPos.X, screenPos.Y)
-
-            -- Make sure the view angle line is visible
-            library.viewAngleLine.Visible = true
-        end
-    end
-
-    local function Updater()
+    coroutine.wrap(function()
         local connection
         connection = game:GetService("RunService").RenderStepped:Connect(function()
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("Head") then
-                local HumPos, OnScreen = camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-                if OnScreen then
-                    local head = camera:WorldToViewportPoint(plr.Character.Head.Position)
-                    local DistanceY = math.clamp((Vector2.new(head.X, head.Y) - Vector2.new(HumPos.X, HumPos.Y)).magnitude, 2, math.huge)
-                    
+            local char = plr.Character
+            if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") and char.Humanoid.Health > 0 then
+                local HumPos, OnScreen = camera:WorldToViewportPoint(char.HumanoidRootPart.Position)
+                local head = camera:WorldToViewportPoint(char.Head.Position)
+                local dist = (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and (player.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).magnitude) or 0
+                if OnScreen and dist <= Settings.MaxDistance then
+                            local DistanceY = math.clamp((Vector2.new(head.X, head.Y) - Vector2.new(HumPos.X, HumPos.Y)).magnitude, 2, math.huge)
+
                     local function Size(item)
                         item.PointA = Vector2.new(HumPos.X + DistanceY, HumPos.Y - DistanceY*2)
                         item.PointB = Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2)
@@ -168,63 +125,85 @@ local function ESP(plr)
                     Size(library.box)
                     Size(library.black)
 
+                    -- Tracer
                     if Settings.Tracers then
-                        if Settings.Tracer_Origin == "Middle" then
-                            library.tracer.From = camera.ViewportSize*0.5
-                            library.blacktracer.From = camera.ViewportSize*0.5
-                        elseif Settings.Tracer_Origin == "Bottom" then
-                            library.tracer.From = Vector2.new(camera.ViewportSize.X*0.5, camera.ViewportSize.Y) 
-                            library.blacktracer.From = Vector2.new(camera.ViewportSize.X*0.5, camera.ViewportSize.Y)
-                        end
-                        if Settings.Tracer_FollowMouse then
-                            library.tracer.From = Vector2.new(mouse.X, mouse.Y+36)
-                            library.blacktracer.From = Vector2.new(mouse.X, mouse.Y+36)
-                        end
-                        library.tracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY*2)
-                        library.blacktracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY*2)
-                    else 
-                        library.tracer.From = Vector2.new(0, 0)
-                        library.blacktracer.From = Vector2.new(0, 0)
-                        library.tracer.To = Vector2.new(0, 0)
-                        library.blacktracer.To = Vector2.new(0, 02)
+                        local origin = Settings.Tracer_FollowMouse and Vector2.new(mouse.X, mouse.Y + 36) or (Settings.Tracer_Origin == "Middle" and camera.ViewportSize * 0.5 or Vector2.new(camera.ViewportSize.X * 0.5, camera.ViewportSize.Y))
+                        library.tracer.From = origin
+                        library.blacktracer.From = origin
+                        library.tracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY * 2)
+                        library.blacktracer.To = Vector2.new(HumPos.X, HumPos.Y + DistanceY * 2)
                     end
 
-                    -- Health Bar Update
-                    local d = (Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2) - Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY*2)).magnitude 
-                    local healthoffset = plr.Character.Humanoid.Health/plr.Character.Humanoid.MaxHealth * d
+                    -- Health bar
+                    local d = (Vector2.new(HumPos.X - DistanceY, HumPos.Y - DistanceY*2) - Vector2.new(HumPos.X - DistanceY, HumPos.Y + DistanceY*2)).magnitude
+                    local healthoffset = char.Humanoid.Health / char.Humanoid.MaxHealth * d
                     library.greenhealth.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
                     library.greenhealth.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2 - healthoffset)
-                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y)
+                    library.healthbar.From = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y + DistanceY*2)
                     library.healthbar.To = Vector2.new(HumPos.X - DistanceY - 4, HumPos.Y - DistanceY*2)
+                    library.greenhealth.Color = Color3.fromRGB(255,0,0):lerp(Color3.fromRGB(0,255,0), char.Humanoid.Health / char.Humanoid.MaxHealth)
 
-                    -- Update Skeleton and View Angle
-                    UpdateSkeleton()
-                    UpdateViewAngle()
+                    -- Name + Distance
+                    library.name.Position = Vector2.new(head.X, head.Y - 25)
+                    library.name.Text = plr.Name
+                    library.name.Visible = true
 
-                    -- Make sure the library is visible
+                    library.distance.Position = Vector2.new(head.X, head.Y - 10)
+                    library.distance.Text = "Stud: " .. tostring(math.floor(dist))
+                    library.distance.Visible = true
+
+                    -- Skeleton
+                    if Settings.Skeleton then
+                        local function getVec(part)
+                            local pos, _ = camera:WorldToViewportPoint(part.Position)
+                            return Vector2.new(pos.X, pos.Y)
+                        end
+                        local joints = {
+                            HeadToTorso = {char.Head, char.HumanoidRootPart},
+                            TorsoToLeftArm = {char:FindFirstChild("LeftUpperArm") or char:FindFirstChild("Left Arm"), char.HumanoidRootPart},
+                            TorsoToRightArm = {char:FindFirstChild("RightUpperArm") or char:FindFirstChild("Right Arm"), char.HumanoidRootPart},
+                            TorsoToLeftLeg = {char:FindFirstChild("LeftUpperLeg") or char:FindFirstChild("Left Leg"), char.HumanoidRootPart},
+                            TorsoToRightLeg = {char:FindFirstChild("RightUpperLeg") or char:FindFirstChild("Right Leg"), char.HumanoidRootPart}
+                        }
+                        for name, parts in pairs(joints) do
+                            if parts[1] and parts[2] then
+                                library.skeleton[name].From = getVec(parts[1])
+                                library.skeleton[name].To = getVec(parts[2])
+                                library.skeleton[name].Visible = true
+                            end
+                        end
+                    end
+
+                    if Team_Check.TeamCheck then
+                        Colorize(plr.TeamColor == player.TeamColor and Team_Check.Green or Team_Check.Red)
+                    elseif TeamColor then
+                        Colorize(plr.TeamColor.Color)
+                    else
+                        Colorize(Settings.Box_Color)
+                    end
+
                     Visibility(true, library)
-                else 
+                else
                     Visibility(false, library)
                 end
-            else 
+            else
                 Visibility(false, library)
-                if game.Players:FindFirstChild(plr.Name) == nil then
+                if not game.Players:FindFirstChild(plr.Name) then
                     connection:Disconnect()
                 end
             end
         end)
-    end
-    coroutine.wrap(Updater)()
+    end)()
 end
 
-for i, v in pairs(game:GetService("Players"):GetPlayers()) do
-    if v.Name ~= player.Name then
-        coroutine.wrap(ESP)(v)
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= player then
+        ESP(v)
     end
 end
 
-game.Players.PlayerAdded:Connect(function(newplr)
-    if newplr.Name ~= player.Name then
-        coroutine.wrap(ESP)(newplr)
+game.Players.PlayerAdded:Connect(function(plr)
+    if plr ~= player then
+        ESP(plr)
     end
 end)
