@@ -24,6 +24,7 @@ local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
 local black = Color3.fromRGB(0, 0, 0)
 
+-- สร้างฟังก์ชันสำหรับการวาดเส้น (Line) และกล่อง (Quad)
 local function NewLine(thickness, color)
     local line = Drawing.new("Line")
     line.Visible = false
@@ -190,7 +191,7 @@ local function ESP(plr)
                         local angle = math.deg(camera.CFrame.Rotation:ToEulerAnglesYXZ())
                         local viewAngleText = string.format("Angle: %.2f", angle)
                         local viewAngleLabel = Drawing.new("Text")
-                        viewAngleLabel.Position = Vector2.new(20, 20)
+                        viewAngleLabel.Position = Vector2.new(20, 40)
                         viewAngleLabel.Size = 14
                         viewAngleLabel.Text = viewAngleText
                         viewAngleLabel.Visible = true
