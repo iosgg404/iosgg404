@@ -1,3 +1,4 @@
+-- this script made for head players how it look at
 local Settings = {
     ViewAngle = true,
     ViewAngle_Thickness = 2,
