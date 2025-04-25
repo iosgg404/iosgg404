@@ -1,0 +1,17 @@
+-- made by Andyc Not me
+getgenv().Spectate = "One"
+getgenv().Create = "Two"
+getgenv().Test = "Three"
+getgenv().Pause = "E"
+getgenv().Backward = "F"
+getgenv().Forward = "G"
+getgenv().FrameBackward = "H"
+getgenv().FrameForward = "Y"
+getgenv().Clear = "Six"
+getgenv().CollisionToggle = "X"
+getgenv().CollisionViewer = "C"
+getgenv().VelocityToggle = "V"
+getgenv().Confirm = "LeftControl"
+getgenv().ClearConfirm = "RightControl"
+getgenv().FrameAdvance = "R"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/0Void2391/Roblox-tas/main/tas.lua"))()
