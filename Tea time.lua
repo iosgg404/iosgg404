@@ -8,6 +8,9 @@ local FoodTab = Window:NewTab("2.5k Food")
 local FeuilleMeringueTab = Window:NewTab("Feuille & Meringue")
 local PastriesTab = Window:NewTab("Pastries")
 local TartsTab = Window:NewTab("Tarts")
+local MacaronsTab = Window:NewTab("Macarons")
+local BreadTab = Window:NewTab("Assorted & Bread")
+local ChurrosTab = Window:NewTab("Churros")
 
 local CookieSection = CookieTab:NewSection("Cookies")
 local CakeSection = CakeTab:NewSection("Cakes")
@@ -16,13 +19,18 @@ local FoodSection = FoodTab:NewSection("2.5k Food")
 local FeuilleMeringueSection = FeuilleMeringueTab:NewSection("Feuille & Meringue")
 local PastriesSection = PastriesTab:NewSection("Pastries")
 local TartsSection = TartsTab:NewSection("Tarts")
+local MacaronsSection = MacaronsTab:NewSection("Macarons")
+local BreadSection = BreadTab:NewSection("Assorted & Bread")
+local ChurrosSection = ChurrosTab:NewSection("Churros")
 
 local cookies = {
     "Tea Cookies", "Chocolate Chlp Cookies", "Checkerboard Cookies",
     "Chocolate Cannoli", "Almond Cannoli", "Pistachio Cannoli",
     "Chocolate Biscotti", "Almond Biscotti", "Cranberry Biscotti",
     "Chocolate Wafers", "Vanilla Wafers", "Strawberry Wafers",
-    "Shortbread", "Peanut Butter Cookies", "Stroopwafel"
+    "Shortbread", "Peanut Butter Cookies", "Stroopwafel",
+    "Peanut Blossom Cookies", "Matcha Blossom Cookies", "Chocolate Blossom Cookies",
+    "Chocolate Butter Cookies", "Butter Cookies", "Caramel Butter cookie"
 }
 
 local cakes =  {
@@ -53,13 +61,31 @@ local feuilleMeringue = {
 }
 
 local pastries = {
-    "Cinnamon Roll", "Scones", "Pretzel", "Belgian Waffle",
-    "Eclairs", "Cream Puff", "Pain au chocolat", "Croissant"
+    "Cinnamon Roll", "Scones", "Pretzel", "Belgian Waffle", "Eclairs",
+    "Cream Puff", "Pain au chocolat", "Croissant"
 }
 
 local tarts = {
-    "Blueberry Tart", "Lemon Tart", "Strawberry Tart",
-    "Cranberry Tart", "Matcha Tart", "Chocolate Tart"
+    "Blueberry Tart", "Lemon Tart", "Strawberry Tart", "Cranberry Tart",
+    "Matcha Tart", "Chocolate Tart"
+}
+
+local macarons = {
+    "Red Velvet Macarons", "Honey Lavender Macarons", "Salted Caramel Macarons",
+    "Lemon Macarons", "Chocolate Macarons", "Pistachio Macarons",
+    "Vanilla Macarons", "Strawberry Macarons", "Coffee Macarons"
+}
+
+local assortedBread = {
+    "Cherry Pie", "Pumpkin Pie", "Blueberry Pie", "Mini Sausage Rolls",
+    "Brownies", "Blondies", "Red Velvet Brownies", "Vanilla Muffin",
+    "Chocolate Muffin", "Cinnamon Muffin", "Pink Concha", "White Concha",
+    "Chocolate Concha", "Pink Iced Bun", "Vanilla Iced Bun", "Chocolate Iced Bun",
+    "Italian Sandwich", "Egg & Cucumber Sandwich", "Smoked Salmon Sandwich"
+}
+
+local churros = {
+    "Churros", "Chocolate Churros", "Red Velvet Churros"
 }
 
 local function createButton(section, name)
@@ -103,6 +129,18 @@ end
 
 for _, name in ipairs(tarts) do
     createButton(TartsSection, name)
+end
+
+for _, name in ipairs(macarons) do
+    createButton(MacaronsSection, name)
+end
+
+for _, name in ipairs(assortedBread) do
+    createButton(BreadSection, name)
+end
+
+for _, name in ipairs(churros) do
+    createButton(ChurrosSection, name)
 end
 
 local ScreenGui = Instance.new("ScreenGui")
