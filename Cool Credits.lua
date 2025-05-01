@@ -38,8 +38,7 @@ TextLabel.BackgroundTransparency = 1
 TextLabel.TextScaled = true
 TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 TextLabel.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel.Text = "Initializing..."
-TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.Text = "BrightKungZero: Loading"
 TextLabel.Parent = NotificationFrame
 
 -- Create the progress bar
@@ -57,61 +56,51 @@ ProgressBarFill.Parent = ProgressBar
 
 -- Function to cycle through rainbow colors
 local function RainbowColor(t)
-	local frequency = 2
-	local r = math.sin(frequency * t + 0) * 127 + 128
-	local g = math.sin(frequency * t + 2) * 127 + 128
-	local b = math.sin(frequency * t + 4) * 127 + 128
-	return Color3.fromRGB(r, g, b)
+local frequency = 2
+local r = math.sin(frequency * t + 0) * 127 + 128
+local g = math.sin(frequency * t + 2) * 127 + 128
+local b = math.sin(frequency * t + 4) * 127 + 128
+return Color3.fromRGB(r, g, b)
 end
 
 -- Function to show the notification
 local function ShowNotification()
-	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local endPosition = UDim2.new(0.01, 0, 0.95, -60)
-	local tween = TweenService:Create(MainFrame, tweenInfo, { Position = endPosition })
-	tween:Play()
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local endPosition = UDim2.new(0.01, 0, 0.95, -60)
+local tween = TweenService:Create(MainFrame, tweenInfo, { Position = endPosition })
+tween:Play()
 
-	local running = true
-	local connection
-	connection = RunService.RenderStepped:Connect(function()
-		local time = tick()
-		local color = RainbowColor(time)
-		ProgressBarFill.BackgroundColor3 = color
-		TextLabel.TextColor3 = color
-		if not running then
-			connection:Disconnect()
-		end
-	end)
+-- Start rainbow update  
+local running = true  
+local connection  
+connection = RunService.RenderStepped:Connect(function()  
+	local time = tick()  
+	local color = RainbowColor(time)  
+	ProgressBarFill.BackgroundColor3 = color  
+	TextLabel.TextColor3 = color  
+	if not running then  
+		connection:Disconnect()  
+	end  
+end)  
 
-	-- Countdown logic
-	local countdownTime = 20
-	local startTime = tick()
-	while tick() - startTime < countdownTime do
-		local elapsedTime = tick() - startTime
-		local progress = 1 - (elapsedTime / countdownTime)
-		ProgressBarFill:TweenSize(UDim2.new(progress, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Linear, 0.1, true)
+-- Start countdown  
+local countdownTime = 10  
+local startTime = tick()  
+while tick() - startTime < countdownTime do  
+	local elapsedTime = tick() - startTime  
+	local progress = 1 - (elapsedTime / countdownTime)  
+	ProgressBarFill:TweenSize(UDim2.new(progress, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Linear, 0.1, true)  
+	task.wait()  
+end  
 
-		-- Update text based on elapsed time
-		if elapsedTime >= 18 then
-			TextLabel.Text = "Success!"
-		elseif elapsedTime >= 8 then
-			TextLabel.Text = "Loading Scripts..."
-		elseif elapsedTime >= 6 then
-			TextLabel.Text = "Loading Output..."
-		elseif elapsedTime >= 4 then
-			TextLabel.Text = "Loading Input..."
-		else
-			TextLabel.Text = "Initializing..."
-		end
+-- Stop rainbow update  
+running = false  
 
-		task.wait()
-	end
+-- Hide the notification  
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)  
+local endTween = TweenService:Create(MainFrame, tweenInfo, { Position = UDim2.new(-1, 0, 0.95, -60) })  
+endTween:Play()
 
-	running = false
-
-	-- Hide the notification
-	local hideTween = TweenService:Create(MainFrame, TweenInfo.new(0.5), { Position = UDim2.new(-1, 0, 0.95, -60) })
-	hideTween:Play()
 end
 
 -- Trigger the notification
