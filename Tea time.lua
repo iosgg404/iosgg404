@@ -7,6 +7,7 @@ local MadeleinesTab = Window:NewTab("Madeleines")
 local FoodTab = Window:NewTab("2.5k Food")
 local FeuilleMeringueTab = Window:NewTab("Feuille & Meringue")
 local PastriesTab = Window:NewTab("Pastries")
+local TartsTab = Window:NewTab("Tarts")
 
 local CookieSection = CookieTab:NewSection("Cookies")
 local CakeSection = CakeTab:NewSection("Cakes")
@@ -14,6 +15,7 @@ local MadeleinesSection = MadeleinesTab:NewSection("Madeleines")
 local FoodSection = FoodTab:NewSection("2.5k Food")
 local FeuilleMeringueSection = FeuilleMeringueTab:NewSection("Feuille & Meringue")
 local PastriesSection = PastriesTab:NewSection("Pastries")
+local TartsSection = TartsTab:NewSection("Tarts")
 
 local cookies = {
     "Tea Cookies", "Chocolate Chlp Cookies", "Checkerboard Cookies",
@@ -55,6 +57,11 @@ local pastries = {
     "Eclairs", "Cream Puff", "Pain au chocolat", "Croissant"
 }
 
+local tarts = {
+    "Blueberry Tart", "Lemon Tart", "Strawberry Tart",
+    "Cranberry Tart", "Matcha Tart", "Chocolate Tart"
+}
+
 local function createButton(section, name)
     section:NewButton(name, "", function()
         local args = {
@@ -92,6 +99,10 @@ end
 
 for _, name in ipairs(pastries) do
     createButton(PastriesSection, name)
+end
+
+for _, name in ipairs(tarts) do
+    createButton(TartsSection, name)
 end
 
 local ScreenGui = Instance.new("ScreenGui")
