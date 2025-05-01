@@ -11,6 +11,12 @@ local TartsTab = Window:NewTab("Tarts")
 local MacaronsTab = Window:NewTab("Macarons")
 local BreadTab = Window:NewTab("Assorted & Bread")
 local ChurrosTab = Window:NewTab("Churros")
+local . = Window:NewTab(".")
+local . = Window:NewTab(".")
+local . = Window:NewTab(".")
+local . = Window:NewTab(".")
+local . = Window:NewTab(".")
+local . = Window:NewTab(".")
 
 local CookieSection = CookieTab:NewSection("Cookies")
 local CakeSection = CakeTab:NewSection("Cakes")
@@ -30,7 +36,7 @@ local cookies = {
     "Chocolate Wafers", "Vanilla Wafers", "Strawberry Wafers",
     "Shortbread", "Peanut Butter Cookies", "Stroopwafel",
     "Peanut Blossom Cookies", "Matcha Blossom Cookies", "Chocolate Blossom Cookies",
-    "Chocolate Butter Cookies", "Butter Cookies", "Caramel Butter cookie"
+    "Chocolate Butter Cookies", "Butter Cookies", "Caramel Butter cookie", ".", ".", ".", "."
 }
 
 local cakes =  {
@@ -39,41 +45,41 @@ local cakes =  {
     "Chocolate Cake", "Red Velvet Cake", "Carrot Cake", "Matcha Mille Crepe", "Vanilla Mille Crepe",
     "Chocolate Mille Crepe", "Chocolate Bundt Cake", "Strawberry Bundt Cake", "Vanilla Bundt Cake",
     "New York Cheesecake", "Blueberry Cheesecake", "Raspberry Cheesecake", "Vanilla Cake",
-    "Matcha Cake", "Fruit Cake"
+    "Matcha Cake", "Fruit Cake", ".", ".", ".", "."
 }
 
 local madeleines = {
-    "Vanilla Madeleines", "Chocolate Madeleines", "Strawberry Madeleines"
+    "Vanilla Madeleines", "Chocolate Madeleines", "Strawberry Madeleines", ".", ".", ".", "."
 }
 
 local petitFours = {
     "Petit Fours", "Chocolate Sticks", "White Chocolate Sticks", "Strawberry Stick",
-    "Chestnut Mont Blanc", "Chocolate Mont Blanc", "Strawberry Mont Blanc"
+    "Chestnut Mont Blanc", "Chocolate Mont Blanc", "Strawberry Mont Blanc", ".", ".", ".", "."
 }
 
 local pannaCotta = {
-    "Panna Cotta", "Chocolate Panna Cotta", "Creme Brulee"
+    "Panna Cotta", "Chocolate Panna Cotta", "Creme Brulee", ".", ".", ".", "."
 }
 
 local feuilleMeringue = {
     "Berries Mille Feuille", "Chocolate Mille Feuille", "Strawberry Meringue",
-    "Mango Meringue", "Blueberry Meringue"
+    "Mango Meringue", "Blueberry Meringue", ".", ".", ".", "."
 }
 
 local pastries = {
     "Cinnamon Roll", "Scones", "Pretzel", "Belgian Waffle", "Eclairs",
-    "Cream Puff", "Pain au chocolat", "Croissant"
+    "Cream Puff", "Pain au chocolat", "Croissant", ".", ".", ".", "."
 }
 
 local tarts = {
     "Blueberry Tart", "Lemon Tart", "Strawberry Tart", "Cranberry Tart",
-    "Matcha Tart", "Chocolate Tart"
+    "Matcha Tart", "Chocolate Tart", ".", ".", ".", "."
 }
 
 local macarons = {
     "Red Velvet Macarons", "Honey Lavender Macarons", "Salted Caramel Macarons",
     "Lemon Macarons", "Chocolate Macarons", "Pistachio Macarons",
-    "Vanilla Macarons", "Strawberry Macarons", "Coffee Macarons"
+    "Vanilla Macarons", "Strawberry Macarons", "Coffee Macarons", ".", ".", ".", "."
 }
 
 local assortedBread = {
@@ -81,11 +87,11 @@ local assortedBread = {
     "Brownies", "Blondies", "Red Velvet Brownies", "Vanilla Muffin",
     "Chocolate Muffin", "Cinnamon Muffin", "Pink Concha", "White Concha",
     "Chocolate Concha", "Pink Iced Bun", "Vanilla Iced Bun", "Chocolate Iced Bun",
-    "Italian Sandwich", "Egg & Cucumber Sandwich", "Smoked Salmon Sandwich"
+    "Italian Sandwich", "Egg & Cucumber Sandwich", "Smoked Salmon Sandwich", ".", ".", ".", "."
 }
 
 local churros = {
-    "Churros", "Chocolate Churros", "Red Velvet Churros"
+    "Churros", "Chocolate Churros", "Red Velvet Churros", ".", ".", ".", ".",
 }
 
 local function createButton(section, name)
