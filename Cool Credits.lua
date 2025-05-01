@@ -38,7 +38,7 @@ TextLabel.BackgroundTransparency = 1
 TextLabel.TextScaled = true
 TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 TextLabel.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel.Text = "BrightKungZERO"
+TextLabel.Text = "BrightKungZero: Loading"
 TextLabel.Parent = NotificationFrame
 
 -- Create the progress bar
@@ -84,7 +84,7 @@ local function ShowNotification()
 	end)
 
 	-- Start countdown
-	local countdownTime = 3
+	local countdownTime = 10
 	local startTime = tick()
 	while tick() - startTime < countdownTime do
 		local elapsedTime = tick() - startTime
