@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Friday Night Funkin</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .arrow {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      font-size: 40px;
+      text-align: center;
+      line-height: 60px;
+      border-radius: 10px;
+      background-color: #ff00ff;
+      color: white;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .target {
+      position: absolute;
+      bottom: 20px;
+      font-size: 40px;
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      border: 2px solid white;
+      border-radius: 10px;
+      opacity: 0.7;
+    }
+
+    .left { left: 10%; }
+    .up { left: 30%; }
+    .down { left: 50%; }
+    .right { left: 70%; }
+
+    .fall {
+      animation: fall 1s linear;
+    }
+
+    @keyframes fall {
+      from { top: -60px; }
+      to { top: 80%; }
+    }
+
+    .combo {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
+      color: yellow;
+      text-shadow: 2px 2px black;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <!-- เป้าหมายที่ต้องกดให้ตรง -->
+    <div class="target arrow left">←</div>
+    <div class="target arrow up">↑</div>
+    <div class="target arrow down">↓</div>
+    <div class="target arrow right">→</div>
+    <div id="combo" class="combo">Combo: 0</div>
+  </div>
+
+  <script>
+    const directions = ['left', 'up', 'down', 'right'];
+    const symbols = { left: '←', up: '↑', down: '↓', right: '→' };
+    const game = document.getElementById('game');
+    const comboText = document.getElementById('combo');
+    let combo = 0;
+
+    // เพิ่มเสียงเมื่อกดลูกศร
+    const correctSound = new Audio('https://www.soundjay.com/button/beep-07.wav'); // เสียงการกดถูก
+    const wrongSound = new Audio('https://www.soundjay.com/button/beep-08b.wav'); // เสียงการกดผิด
+
+    function spawnArrow() {
+      const dir = directions[Math.floor(Math.random() * directions.length)];
+      const arrow = document.createElement('div');
+      arrow.className = `arrow fall ${dir}`;
+      arrow.innerText = symbols[dir];
+      arrow.style.top = '-60px';
+      game.appendChild(arrow);
+
+      // ลบเมื่อหล่นถึงล่างสุด
+      setTimeout(() => {
+        if (game.contains(arrow)) {
+          game.removeChild(arrow);
+          combo++;  // เพิ่มคอมโบเมื่อลูกศรหล่นลงมา
+          updateCombo();
+        }
+      }, 2000);
+    }
+
+    // สุ่มลูกศรทุก 700ms
+    setInterval(spawnArrow, 700);
+
+    // อัปเดตตัวเลขคอมโบ
+    function updateCombo() {
+      comboText.innerText = `Combo: ${combo}`;
+    }
+
+    // ตรวจจับการกดปุ่ม
+    document.addEventListener('keydown', (e) => {
+      const keyMap = {
+        ArrowLeft: 'left',
+        ArrowUp: 'up',
+        ArrowDown: 'down',
+        ArrowRight: 'right'
+      };
+      const dir = keyMap[e.key];
+      if (dir) {
+        const arrows = Array.from(document.querySelectorAll(`.arrow.fall.${dir}`));
+        for (const a of arrows) {
+          const rect = a.getBoundingClientRect();
+          const top = rect.top;
+
+          // ตรวจสอบว่าลูกศรอยู่ในตำแหน่งที่กดได้
+          if (top > window.innerHeight * 0.7 && top < window.innerHeight * 0.85) {
+            a.remove();
+
+            // เพิ่มคอมโบและทำให้ปุ่มขยายและเปลี่ยนสี
+            combo++;
+            updateCombo();
+            correctSound.play(); // เล่นเสียงเมื่อกดถูก
+
+            // เพิ่มเอฟเฟกต์การขยายและเปลี่ยนสี
+            a.style.transform = 'scale(1.5)';
+            a.style.backgroundColor = 'white';
+
+            // กลับสู่สภาพปกติ
+            setTimeout(() => {
+              a.style.transform = 'scale(1)';
+              a.style.backgroundColor = '#ff00ff';
+            }, 200);
+            return;
+          }
+        }
+        // ถ้ากดผิด
+        wrongSound.play(); // เล่นเสียงเมื่อกดผิด
+      }
+    });
+  </script>
+</body>
+</html>
