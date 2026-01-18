@@ -1,4 +1,4 @@
 -- [ALERT] 
 -- The source code has been modified by 'Anonemous'.
--- He left a gift inside the 'ENTITY.png' file properties.
+-- He left a gift inside the 'notepad?' file properties.
 -- "Don't just look at the picture... read the soul of the data."
