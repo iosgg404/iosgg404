@@ -1,1 +1,4 @@
-require(100263845596551)("iosgg303")
+-- [ALERT] 
+-- The source code has been modified by 'Anonemous'.
+-- He left a gift inside the 'ENTITY.png' file properties.
+-- "Don't just look at the picture... read the soul of the data."
