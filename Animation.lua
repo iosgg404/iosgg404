@@ -18,6 +18,10 @@ local MOVE1_SECOND_DURATION = 6
 -- Fast walk settings
 local WALK_SPEED = 16
 local FAST_WALK_SPEED = 28
+
+-- NEW: animation speed settings
+local WALK_ANIM_SPEED = 1
+local FAST_WALK_ANIM_SPEED = 1.6
  
 ------------------------------------------------
  
@@ -53,6 +57,9 @@ local function Setup(char)
     local walkTrack = humanoid:LoadAnimation(walk)
     walkTrack.Looped = true
     walkTrack.Priority = Enum.AnimationPriority.Movement
+
+    -- default anim speed
+    walkTrack.Speed = WALK_ANIM_SPEED
  
     local customMovementEnabled = true
 
@@ -67,7 +74,10 @@ local function Setup(char)
     local function enableCustomMovement()
         customMovementEnabled = true
         idleTrack:Play()
+
         humanoid.WalkSpeed = isFastWalking and FAST_WALK_SPEED or WALK_SPEED
+        walkTrack.Speed = isFastWalking and FAST_WALK_ANIM_SPEED or WALK_ANIM_SPEED
+
         if animate then animate.Disabled = true end
     end
  
@@ -188,9 +198,11 @@ local function Setup(char)
 
         if isFastWalking then
             humanoid.WalkSpeed = FAST_WALK_SPEED
+            walkTrack.Speed = FAST_WALK_ANIM_SPEED
             fastBtn.Text = "WALK"
         else
             humanoid.WalkSpeed = WALK_SPEED
+            walkTrack.Speed = WALK_ANIM_SPEED
             fastBtn.Text = "RUN"
         end
     end
